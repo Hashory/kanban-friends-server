@@ -1,0 +1,198 @@
+openapi: "3.0.3"
+info:
+  title: kanban-friends-api
+  version: "1.0"
+
+servers:
+  - url: http://localhost:3000/v1
+
+paths:
+  # /user:
+  #   get:
+  #     summary: Get user infomation
+  #     operationId: "getUser"
+  #     responses:
+  #       "200":
+  #         description: Get user infomation
+  #         content:
+  #           application/json:
+  #             schema:
+  #               items:
+  #                 $ref: "#/components/schemas/User"
+  #   post:
+  #     summary: create user
+  #     operationId: "create user"
+  #     requestBody:
+  #       description: "create user data"
+  #       content:
+  #         application/json:
+  #           schema:
+  #             items:
+  #               $ref: "#/components/schemas/User"
+  #     responses:
+  #       "200":
+  #         description: Changed username
+  #       "400":
+  #         description: parameter error
+  #       "500":
+  #         description: Faild to change username
+
+  #hand
+  /hand:
+    get:
+      summary: GET hands(card and board)
+      operationId: "getHand"
+      parameters:
+        - name: userToken
+          in: query
+          schema:
+            type: string
+          style: form
+          required: true
+        - name: handId
+          in: query
+          schema:
+            type: string
+          style: form
+        - name: isChildren
+          in: query
+          schema:
+            type: boolean
+          style: form
+      responses:
+        "200":
+          description: GET hands(card and board)
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: "#/components/schemas/Hand"
+        "400":
+          description: parameter error
+          content:
+            "application/json": {}
+        "500":
+          description: Faild
+          content:
+            "application/json": {}
+  /hand/create:
+    post:
+      summary: Create hand(card and board)
+      operationId: "createHand"
+      requestBody:
+        description: hand to create
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateHand"
+      responses:
+        "201":
+          description: created
+        "400":
+          description: parameter error
+        "500":
+          description: field to created
+  /hand/update:
+    post:
+      summary: update hand
+      operationId: "updateHand"
+      requestBody:
+        description: hand to update
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateHand"
+      responses:
+        "200":
+          description: updated
+        "400":
+          description: parameter error
+        "500":
+          description: field to update
+  /hand/delete:
+    post:
+      summary: delete hand
+      operationId: "deleteHand"
+      requestBody:
+        description: hand to delete
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/deleteHand"
+      responses:
+        "200":
+          description: deleted
+        "400":
+          description: parameter error
+        "500":
+          description: field to delete
+
+#  /card:
+#    post:
+
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        userid:
+          type: string
+        username:
+          type: string
+
+    Hand:
+      type: object
+      required:
+        - type
+        - value
+        - id
+      properties:
+        id:
+          type: number
+        type:
+          type: string
+        value:
+          type: string
+        children:
+          type: array
+          items:
+            $ref: "#/components/schemas/Hand"
+
+    CreateHand:
+      type: object
+      required:
+        - type
+        - value
+        - parent
+      properties:
+        type:
+          type: string
+        value:
+          type: string
+        parent:
+          type: string
+
+    UpdateHand:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          type: number
+        value:
+          type: string
+        parentTo:
+          type: number
+        parentToPos:
+          type: number
+
+    deleteHand:
+      type: object
+      required:
+        - id
+        - isChildren
+      properties:
+        id:
+          type: number
+        isChildren:
+          type: boolean

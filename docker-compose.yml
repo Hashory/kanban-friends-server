@@ -1,0 +1,28 @@
+version: "3"
+services:
+  app:
+    build: .
+    tty: true
+    ports:
+      - 3000:3000
+    volumes:
+      - .:/kanban-friends-server
+    depends_on:
+      - db
+  db:
+    build: 
+      context: "."
+      dockerfile: "db.Dockerfile"
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: kanban-friends-server
+      TZ: "Asia/Tokyo"
+    volumes:
+      - kanban-friends-data:/var/lib/postgresql/data
+volumes:
+  kanban-friends-data:
+    external: true
+
