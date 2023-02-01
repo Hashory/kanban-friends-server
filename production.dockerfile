@@ -12,6 +12,7 @@ COPY . /kanban-friends-server
 
 RUN npm install
 RUN npx tsc --project tsconfig.production.json
+RUN chmod 744 ./startup.sh
 
 
-CMD [ "node", "./src/index.js" ]
+CMD [ "./startup.sh" ]
