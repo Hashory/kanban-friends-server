@@ -63,7 +63,6 @@ export async function getHand (req: Request, res: Response & { validateResponse:
       });
 
     } else {
-      console.log(primaryHand.id);
       response = {
         id: primaryHand.id,
         type: primaryHand.type,
@@ -71,9 +70,6 @@ export async function getHand (req: Request, res: Response & { validateResponse:
         children: []
       }
     }
-
-    console.log("response");
-    console.log(response);
 
     // response check
     const validationError = res.validateResponse(200, response);
@@ -119,7 +115,6 @@ export async function updateHand (req: Request, res: Response): Promise<void> {
     const userid = await verifyToken(token)
 
     // update Hand
-    console.log(userid);
     let updateHand = await Hand.findOne({where: { id: req.body.id, user_id: userid }})
     if(!updateHand) { throw new Error("hand not found"); }
 
