@@ -8,6 +8,7 @@ RUN locale-gen ja_JP.UTF-8
 ENV LANG=ja_JP.UTF-8
 ENV TZ=Asia/Tokyo
 WORKDIR /kanban-friends-server
+COPY . /kanban-friends-server
 
 RUN npm install
 RUN npx tsc --project tsconfig.production.json
