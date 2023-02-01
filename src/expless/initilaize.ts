@@ -2,27 +2,19 @@ import express from "express";
 import { createServer } from "http";
 import * as explessOpenAPI from "express-openapi";
 import helmet from "helmet";
-// import cors from "cors";
+import cors from "cors";
 import bodyParser from "body-parser";
 import path from "node:path";
 import openAPISchema from "./openapi";
-// import * as user_controller from "./controller/user";
 import * as hand_controller from "./controller/hand";
 
 function explessInit() {
 
   const app = express();
-  // app.use(helmet());
+  app.use(helmet());
   app.use(bodyParser.json());
   app.use(bodyParser.urlencoded({ extended: true }));
-  // app.use(cors());
-  /*
-  app.use(
-    checkReferer(
-      process.env.NODE_ENV === "development" ? "localhost" : "hashory.work",
-    ),
-  );
-  */
+  app.use(cors());
 
   explessOpenAPI.initialize({
     app,

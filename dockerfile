@@ -1,3 +1,4 @@
+#########################################################
 FROM --platform=linux/x86_64 node:18-slim
 
 RUN apt-get update && \
@@ -7,3 +8,9 @@ RUN locale-gen ja_JP.UTF-8
 ENV LANG=ja_JP.UTF-8
 ENV TZ=Asia/Tokyo
 WORKDIR /kanban-friends-server
+
+RUN npm install
+RUN npm 
+
+
+CMD [ "node", "./src/index.js" ]

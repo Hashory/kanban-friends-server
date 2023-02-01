@@ -38,64 +38,52 @@ export async function getHand (req: Request, res: Response & { validateResponse:
     // childload
     if(isChildren && primaryHand.children_ids) {
       const loadChild = async (hand: { id: number; type: string; value: string; children: number[]; }): Promise<response_hand_type> => {
-        let _hand: response_hand_type = {
+        const _children = await Hand.findAll({where: {id: { [Op.in]: hand.children}}});
+
+        return {
           id: hand.id,
           type: hand.type,
           value: hand.value,
-          children: [],
-        };
-
-        const children = await Hand.findAll({
-          where: {
-            id: {
-              [Op.in]: hand.children
-            }
-          }
-        });
-        _hand.children = await Promise.all(children.map(async (child): Promise<response_hand_type> => {
-          let _child: response_hand_type = {
-            id: child.id,
-            type: child.type,
-            value: child.value,
-            children: [],
-          }
-
-          const __children = await loadChild({
-            id: child.id,
-            type: child.type,
-            value: child.value,
-            children: child.children_ids
-          });
-
-          _child.children = [{...__children}];
-          return _child;
-        }));
-
-        return _hand;
+          children: await Promise.all(_children.map(async (child): Promise<response_hand_type> => {
+            return await loadChild({
+              id: child.id,
+              type: child.type,
+              value: child.value,
+              children: [...child.children_ids]
+            })
+          }))
+        }
       }
 
       response = await loadChild({
         id: primaryHand.id,
         type: primaryHand.type,
         value: primaryHand.value,
-        children: primaryHand.children_ids
+        children: [...primaryHand.children_ids]
       });
+
     } else {
       console.log(primaryHand.id);
       response = {
         id: primaryHand.id,
         type: primaryHand.type,
         value: primaryHand.value,
+        children: []
       }
     }
+
+    console.log("response");
+    console.log(response);
 
     // response check
     const validationError = res.validateResponse(200, response);
     if (validationError) {
+      console.error(validationError);
       throw new Error(validationError); 
     }
-
-    res.status(200).send(response);
+  
+    res.status(200);
+    res.send(response);
   } catch (error) {
     console.error(error);
     res.status(500).send("500-サーバーエラー");
@@ -110,7 +98,8 @@ export async function createHand (req: Request, res: Response): Promise<void> {
     // create hand
     const createHand = await Hand.create({
       type: req.body.type,
-      value: req.body.value
+      value: req.body.value,
+      user_id: userid
     });
     // add parent relation
     Hand.findOne({where: { id: req.body.parent }}).then((parent) => {
@@ -128,27 +117,29 @@ export async function updateHand (req: Request, res: Response): Promise<void> {
   try {
     const token = req.query.userToken?.toString() ? req.query.userToken.toString() : "";
     const userid = await verifyToken(token)
-  // update Hand
-  Hand.findOne({where: { id: req.body.id }}).then((updateHand) => {
-    let updateProp: any = {};
+
+    // update Hand
+    console.log(userid);
+    let updateHand = await Hand.findOne({where: { id: req.body.id, user_id: userid }})
+    if(!updateHand) { throw new Error("hand not found"); }
 
     //value update
     if(req.body.hasOwnProperty("value")) {
-      updateProp.value = req.body.value;
+      await updateHand?.update({value: req.body.value});
     }
 
     //parent update
     if(req.body.hasOwnProperty("parentTo") && req.body.hasOwnProperty("parentToPos")) {
-      updateProp.parentTo = req.body.parentTo;
-      updateProp.parentToPos = req.body.parentToPos;
+      const parentTo = await Hand.findOne({where: { id: req.body.parentTo, user_id: userid }})
+      if(!parentTo) { throw new Error("hand not found"); }
+
+      //parentTo update
+      const parentToChildren = parentTo.children_ids;
+      parentToChildren.splice(req.body.parentToPos, 0, updateHand.id);
+      await parentTo.update({children_ids: parentToChildren});
     }
 
-    //update Hand
-    updateHand?.update(updateProp).then(() => {
-      res.status(200).send("200-更新しました");
-    });
-  })
-
+    res.status(200).send("200-更新しました");
   } catch (error) {
     console.error(error);
     res.status(500).send("500-サーバーエラー");
@@ -160,13 +151,17 @@ export async function deleteHand (req: Request, res: Response): Promise<void> {
     const token = req.query.userToken?.toString() ? req.query.userToken.toString() : "";
     const userid = await verifyToken(token)
 
-    Hand.findOne({where: {id: req.body.id}}).then((deleteHand) => {
-      const del = deleteHand?.destroy();
-      const parent = new Promise(() => {}); //TODO delete parent's children slot.
-      Promise.all([del, parent]).then(() => {
-        res.status(200).send("削除しました");
-      })
-    })
+    let deleteHand = await Hand.findOne({where: {id: req.body.id, user_id: userid}});
+    if(!deleteHand) { throw new Error("hand not found"); }
+
+    const parent = await Hand.findOne({where: {children_ids: {[Op.contains]: [deleteHand.id]}}});
+    if(!parent) { throw new Error("hand not found"); }
+    
+    const pupdate = parent?.update({children_ids: parent.children_ids.filter((id) => id !== deleteHand?.id)});
+    const del = deleteHand?.destroy();
+
+    await Promise.all([del, pupdate])
+    res.status(200).send("削除しました");
   } catch (error) {
     console.error(error);
     res.status(500).send("500-サーバーエラー");
@@ -181,7 +176,7 @@ async function newUserCreate (userid: string): Promise<void> {
     type: "note",
     value: "簡単に使い方について説明します",
     children_ids: [],
-    userid: userid
+    user_id: userid
   });
 
   // create board
@@ -195,9 +190,8 @@ async function newUserCreate (userid: string): Promise<void> {
   // create user board
   const userBoard = await Hand.create({
     type: "user_board",
-    value: "はじめまして",
+    value: "ユーザーボード",
     children_ids: [board.id],
     user_id: userid
   });
-
 }

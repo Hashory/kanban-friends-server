@@ -79,6 +79,13 @@ paths:
     post:
       summary: Create hand(card and board)
       operationId: "createHand"
+      parameters:
+        - name: userToken
+          in: query
+          schema:
+            type: string
+          style: form
+          required: true
       requestBody:
         description: hand to create
         content:
@@ -96,6 +103,13 @@ paths:
     post:
       summary: update hand
       operationId: "updateHand"
+      parameters:
+        - name: userToken
+          in: query
+          schema:
+            type: string
+          style: form
+          required: true
       requestBody:
         description: hand to update
         content:
@@ -113,6 +127,13 @@ paths:
     post:
       summary: delete hand
       operationId: "deleteHand"
+      parameters:
+        - name: userToken
+          in: query
+          schema:
+            type: string
+          style: form
+          required: true
       requestBody:
         description: hand to delete
         content:
