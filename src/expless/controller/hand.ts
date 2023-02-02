@@ -95,19 +95,20 @@ export async function createHand (req: Request, res: Response & { validateRespon
     const createHand = await Hand.create({
       type: req.body.type,
       value: req.body.value,
+      children_ids: [],
       user_id: userid
     });
 
     // add parent relation
     const parent = await Hand.findOne({where: { id: req.body.parent }})
     if(!parent) { throw new Error("hand not found"); }
-    parent.update({children_ids: [...parent.children_ids, createHand.children_ids]})
+    parent.update({children_ids: [...parent.children_ids, createHand.id]})
         
     let response = {
       id: createHand.id,
       type: createHand.type,
       value: createHand.value,
-      children: []
+      children: [...createHand.children_ids]
     }
 
     // response check
@@ -172,7 +173,7 @@ export async function deleteHand (req: Request, res: Response): Promise<void> {
     const del = deleteHand?.destroy();
 
     await Promise.all([del, pupdate])
-    res.status(200).send("削除しました");
+    res.status(200).send("200-削除しました");
   } catch (error) {
     console.error(error);
     res.status(500).send("500-サーバーエラー");
@@ -185,7 +186,7 @@ async function newUserCreate (userid: string): Promise<void> {
   //create note hand
   const noteHand = await Hand.create({
     type: "note",
-    value: "簡単に使い方について説明します",
+    value: "kanban-friendsへようこそ！",
     children_ids: [],
     user_id: userid
   });

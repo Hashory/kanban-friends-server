@@ -177,9 +177,6 @@ components:
       type: object
       required:
         - id
-        - isChildren
       properties:
         id:
           type: number
-        isChildren:
-          type: boolean
