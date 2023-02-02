@@ -7,36 +7,6 @@ servers:
   - url: http://localhost:3000/v1
 
 paths:
-  # /user:
-  #   get:
-  #     summary: Get user infomation
-  #     operationId: "getUser"
-  #     responses:
-  #       "200":
-  #         description: Get user infomation
-  #         content:
-  #           application/json:
-  #             schema:
-  #               items:
-  #                 $ref: "#/components/schemas/User"
-  #   post:
-  #     summary: create user
-  #     operationId: "create user"
-  #     requestBody:
-  #       description: "create user data"
-  #       content:
-  #         application/json:
-  #           schema:
-  #             items:
-  #               $ref: "#/components/schemas/User"
-  #     responses:
-  #       "200":
-  #         description: Changed username
-  #       "400":
-  #         description: parameter error
-  #       "500":
-  #         description: Faild to change username
-
   #hand
   /hand:
     get:
@@ -93,8 +63,12 @@ paths:
             schema:
               $ref: "#/components/schemas/CreateHand"
       responses:
-        "201":
+        "200":
           description: created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Hand"
         "400":
           description: parameter error
         "500":
@@ -153,14 +127,6 @@ paths:
 
 components:
   schemas:
-    User:
-      type: object
-      properties:
-        userid:
-          type: string
-        username:
-          type: string
-
     Hand:
       type: object
       required:
@@ -191,7 +157,7 @@ components:
         value:
           type: string
         parent:
-          type: string
+          type: number
 
     UpdateHand:
       type: object

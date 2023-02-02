@@ -86,7 +86,7 @@ export async function getHand (req: Request, res: Response & { validateResponse:
   }
 }
 
-export async function createHand (req: Request, res: Response): Promise<void> {
+export async function createHand (req: Request, res: Response & { validateResponse: any }): Promise<void> {
   try {
     const token = req.query.userToken?.toString() ? req.query.userToken.toString() : "";
     const userid = await verifyToken(token)
@@ -97,12 +97,28 @@ export async function createHand (req: Request, res: Response): Promise<void> {
       value: req.body.value,
       user_id: userid
     });
+
     // add parent relation
-    Hand.findOne({where: { id: req.body.parent }}).then((parent) => {
-      parent?.update({children_ids: [...parent.children_ids, createHand.children_ids]}).then(() => {
-        res.status(200).send("200-作成しました");
-      })
-    })
+    const parent = await Hand.findOne({where: { id: req.body.parent }})
+    if(!parent) { throw new Error("hand not found"); }
+    parent.update({children_ids: [...parent.children_ids, createHand.children_ids]})
+        
+    let response = {
+      id: createHand.id,
+      type: createHand.type,
+      value: createHand.value,
+      children: []
+    }
+
+    // response check
+    const validationError = res.validateResponse(200, response);
+    if (validationError) {
+      console.error(validationError);
+      throw new Error(validationError); 
+    }
+        
+    res.status(200).send(response);
+    
   } catch (error) {
     console.error(error);
     res.status(500).send("500-サーバーエラー");
