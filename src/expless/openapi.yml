@@ -122,8 +122,24 @@ paths:
         "500":
           description: field to delete
 
-#  /card:
-#    post:
+  /card/discord:
+    get:
+      summary: get discord data
+      operationId: "cardDiscordData"
+      parameters:
+        - name: discordUser
+          in: query
+          schema:
+            type: string
+          style: form
+          required: true
+      responses:
+        "200":
+          description: get discord data
+        "400":
+          description: parameter error
+        "500":
+          description: field to get discord data
 
 components:
   schemas:

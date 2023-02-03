@@ -7,6 +7,7 @@ import bodyParser from "body-parser";
 import path from "node:path";
 import openAPISchema from "./openapi";
 import * as hand_controller from "./controller/hand";
+import { getDiscordStatus } from "./controller/cards/discord";
 
 function explessInit() {
 
@@ -29,6 +30,7 @@ function explessInit() {
       deleteHand: [hand_controller.deleteHand],
 
       // cards
+      cardDiscordData: [getDiscordStatus],
     },
     errorMiddleware: (err, req, res, next) => {
       res.status(err.status | 500).send(err);
