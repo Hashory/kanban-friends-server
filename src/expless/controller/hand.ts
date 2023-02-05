@@ -149,6 +149,13 @@ export async function updateHand (req: Request, res: Response): Promise<void> {
       const parentToChildren = parentTo.children_ids;
       parentToChildren.splice(req.body.parentToPos, 0, updateHand.id);
       await parentTo.update({children_ids: parentToChildren});
+
+      //parent delete
+      const parent = await Hand.findOne({where: {children_ids: {[Op.contains]: [updateHand.id]}}});
+      if(!parent) { throw new Error("hand not found"); }
+      const parentChildren = parent.children_ids;
+      parentChildren.splice(parentChildren.indexOf(updateHand.id), 1);
+      await parent.update({children_ids: parentChildren});
     }
 
     res.status(200).send("200-更新しました");
