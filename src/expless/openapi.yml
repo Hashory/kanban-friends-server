@@ -141,6 +141,25 @@ paths:
         "500":
           description: field to get discord data
 
+  /card/github:
+    get:
+      summary: get github stuats data
+      operationId: "cardGithubData"
+      parameters:
+        - name: githubUser
+          in: query
+          schema:
+            type: string
+          style: form
+          required: true
+      responses:
+        "200":
+          description: get github data
+        "400":
+          description: parameter error
+        "500":
+          description: field to get github data
+
 components:
   schemas:
     Hand:

@@ -8,6 +8,7 @@ import path from "node:path";
 import openAPISchema from "./openapi";
 import * as hand_controller from "./controller/hand";
 import { getDiscordStatus } from "./controller/cards/discord";
+import { getGithubStatus } from "./controller/cards/github";
 
 function explessInit() {
 
@@ -31,6 +32,7 @@ function explessInit() {
 
       // cards
       cardDiscordData: [getDiscordStatus],
+      cardGithubData: [getGithubStatus]
     },
     errorMiddleware: (err, req, res, next) => {
       res.status(err.status | 500).send(err);
